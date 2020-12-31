@@ -3,7 +3,7 @@ import abc
 
 import numpy as np
 
-import problem
+from problems import stationary_problem
 
 
 class Algorithm(abc.ABC):
@@ -11,7 +11,7 @@ class Algorithm(abc.ABC):
 
     def __init__(self, name: str, time_steps: int = 0):
         self.name = name
-        self.problem: Optional[problem.Problem] = None
+        self.problem: Optional[stationary_problem.StationaryProblem] = None
         self.epoch: int = 0
         self.t: int = 0
         self._time_steps: int = time_steps
@@ -23,7 +23,7 @@ class Algorithm(abc.ABC):
         self.av_return: np.ndarray = np.zeros(shape=self._time_steps, dtype=float)
         self.av_percent: np.ndarray = np.zeros(shape=self._time_steps, dtype=float)
 
-    def set_problem(self, problem_: problem.Problem, epoch: int):
+    def set_problem(self, problem_: stationary_problem.StationaryProblem, epoch: int):
         self.problem = problem_
         self.epoch = epoch
         self.initialize()

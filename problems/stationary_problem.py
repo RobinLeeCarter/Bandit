@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class Problem:
+class StationaryProblem:
     k: int = 10
     rng: np.random.Generator = np.random.default_rng()
 

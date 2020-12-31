@@ -1,9 +1,9 @@
 import numpy as np
 
-import problem
+from problems import stationary_problem
 
 
-class NonStationaryProblem(problem.Problem):
+class NonStationaryProblem(stationary_problem.StationaryProblem):
     def __init__(self):
         super().__init__()
 

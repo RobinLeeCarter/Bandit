@@ -1,12 +1,11 @@
 import numpy as np
 
-import algorithm
+from algorithms import algorithm
 
 
-class EGreedy(algorithm.Algorithm):
-    def __init__(self, name: str, epsilon: float = 1.0, time_steps: int = 1000):
+class Greedy(algorithm.Algorithm):
+    def __init__(self, name: str, time_steps: int = 1000):
         super().__init__(name, time_steps)
-        self.epsilon: float = epsilon   # explore rate
         self.step_size: float = 1           # step-size
         self.N: np.ndarray = np.zeros(shape=0, dtype=float)
         self.Q: np.ndarray = np.zeros(shape=0, dtype=float)
@@ -21,7 +20,6 @@ class EGreedy(algorithm.Algorithm):
         self.N[self._a] += 1
         self._set_step_size()
         self.Q[self._a] += self.step_size * (self._r - self.Q[self._a])
-        # self.Q[self._a] += (1 / self.N[self._a]) * (self._r - self.Q[self._a])
         # print(f"Action={self._a}\t" +
         #       f"return={self._r:.2f}" +
         #       f"\tN[a]={self.N[self._a]}" +
@@ -31,14 +29,7 @@ class EGreedy(algorithm.Algorithm):
         self.step_size = (1 / self.N[self._a])
 
     def pick_action(self) -> int:
-        if self.rng.uniform() > self.epsilon:
-            # greedy_action
-            a = self.get_greedy_action()
-            # print(f"greedy {a}")
-        else:
-            # random action
-            a = self.get_random_action()
-            # print(f"random {a}")
+        a = self.get_greedy_action()
         return a
 
     def get_greedy_action(self) -> int:
@@ -46,8 +37,4 @@ class EGreedy(algorithm.Algorithm):
         best_q_bool = (self.Q == best_q)
         best_a = np.flatnonzero(best_q_bool)
         a = self.rng.choice(best_a)
-        return a
-
-    def get_random_action(self) -> int:
-        a = self.rng.integers(low=0, high=self.problem.k)
         return a

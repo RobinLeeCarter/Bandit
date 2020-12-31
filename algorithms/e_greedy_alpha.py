@@ -1,6 +1,6 @@
 # import numpy as np
 
-import e_greedy
+from algorithms import e_greedy
 
 
 class EGreedyAlpha(e_greedy.EGreedy):
