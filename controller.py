@@ -32,29 +32,27 @@ class Controller:
         #                                    epsilon=0.1, alpha=0.1, time_steps=self.time_steps)
         # self.algorithms = [alg1, alg2]
 
-        self.epochs = 2000
-        self.time_steps = 1000
-        alg1 = algorithms.EGreedyAlpha(name="optimistic non-greedy biased",
-                                       epsilon=0.1, alpha=0.1, time_steps=self.time_steps, q1=5.0)
-        alg2 = algorithms.EGreedyAlpha(name="optimistic non-greedy unbiased",
-                                       epsilon=0.1, alpha=0.1, time_steps=self.time_steps, q1=5.0, biased=False)
-        self.algorithms = [alg1, alg2]
-
         # self.epochs = 2000
         # self.time_steps = 1000
-        # alg1 = algorithms.EGreedy(name="e-greedy",
-        #                         epsilon=0.1, time_steps=self.time_steps)
+        # alg1 = algorithms.EGreedyAlpha(name="optimistic non-greedy biased",
+        #                                epsilon=0.1, alpha=0.1, time_steps=self.time_steps, q1=5.0)
         # alg2 = algorithms.EGreedyAlpha(name="optimistic non-greedy unbiased",
-        #                                    epsilon=0.1, alpha=0.1, time_steps=self.time_steps, q1=5.0, biased=False)
+        #                                epsilon=0.1, alpha=0.1, time_steps=self.time_steps, q1=5.0, biased=False)
         # self.algorithms = [alg1, alg2]
+
+        self.epochs = 2000
+        self.time_steps = 1000
+        alg1 = algorithms.EGreedy(name="e-greedy", epsilon=0.1, time_steps=self.time_steps)
+        alg2 = algorithms.UCB(name="UCB", time_steps=self.time_steps, c=2.0)
+        self.algorithms = [alg1, alg2]
 
     def run(self):
         for epoch in range(self.epochs):
             if self.verbose and epoch % 100 == 0:
                 print(f"epoch = {epoch}")
 
-            # problem_ = problems.StationaryProblem()
-            problem_ = problems.NonStationaryProblem()
+            problem_ = problems.StationaryProblem()
+            # problem_ = problems.NonStationaryProblem()
             for alg in self.algorithms:
                 alg.set_problem(problem_, epoch)
 
