@@ -4,8 +4,10 @@ from problems import stationary_problem
 
 
 class NonStationaryProblem(stationary_problem.StationaryProblem):
-    def __init__(self):
-        super().__init__()
+    is_stationary: bool = False
+
+    def __init__(self, center: float = 0.0):
+        super().__init__(center)
 
     # noinspection PyUnusedLocal
     def do_time_step(self, t: int = 0):

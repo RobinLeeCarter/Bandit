@@ -40,18 +40,27 @@ class Controller:
         #                                epsilon=0.1, alpha=0.1, time_steps=self.time_steps, q1=5.0, biased=False)
         # self.algorithms = [alg1, alg2]
 
-        self.epochs = 2000
+        # self.epochs = 2000
+        # self.time_steps = 1000
+        # alg1 = algorithms.EGreedy(name="e-greedy", epsilon=0.1, time_steps=self.time_steps)
+        # alg2 = algorithms.UCB(name="UCB", time_steps=self.time_steps, c=2.0)
+        # self.algorithms = [alg1, alg2]
+
+        self.epochs = 200
         self.time_steps = 1000
-        alg1 = algorithms.EGreedy(name="e-greedy", epsilon=0.1, time_steps=self.time_steps)
-        alg2 = algorithms.UCB(name="UCB", time_steps=self.time_steps, c=2.0)
-        self.algorithms = [alg1, alg2]
+        gb = algorithms.GradientBandit
+        alg1 = gb(name="alpha=0.1", time_steps=self.time_steps, alpha=0.1)
+        alg2 = gb(name="alpha=0.1 no baseline", time_steps=self.time_steps, alpha=0.1, baseline_enabled=False)
+        alg3 = gb(name="alpha=0.4", time_steps=self.time_steps, alpha=0.4)
+        alg4 = gb(name="alpha=0.4 no baseline", time_steps=self.time_steps, alpha=0.4, baseline_enabled=False)
+        self.algorithms = [alg1, alg2, alg3, alg4]
 
     def run(self):
         for epoch in range(self.epochs):
             if self.verbose and epoch % 100 == 0:
                 print(f"epoch = {epoch}")
 
-            problem_ = problems.StationaryProblem()
+            problem_ = problems.StationaryProblem(center=4.0)
             # problem_ = problems.NonStationaryProblem()
             for alg in self.algorithms:
                 alg.set_problem(problem_, epoch)
