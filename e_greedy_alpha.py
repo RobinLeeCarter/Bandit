@@ -1,12 +1,12 @@
-import numpy as np
+# import numpy as np
 
 import e_greedy
 
 
 class EGreedyAlpha(e_greedy.EGreedy):
-    def __init__(self, name: str, epsilon: float = 1.0, alpha: float = 1.0, iterations: int = 1000
-                 , q1: float = 0, biased: bool = True):
-        super().__init__(name, epsilon, iterations)
+    def __init__(self, name: str, epsilon: float = 1.0, alpha: float = 1.0, time_steps: int = 1000,
+                 q1: float = 0, biased: bool = True):
+        super().__init__(name, epsilon, time_steps)
         self.alpha = alpha
         self.q1 = q1
         self.biased = biased

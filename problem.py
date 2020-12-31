@@ -18,7 +18,7 @@ class Problem:
         self.mean = self.rng.normal(size=self.k)
 
     # noinspection PyUnusedLocal
-    def do_iteration(self, iteration: int = 0):
+    def do_time_step(self, t: int = 0):
         pass
 
     def get_return(self, action: int) -> float:

@@ -4,8 +4,8 @@ import algorithm
 
 
 class EGreedy(algorithm.Algorithm):
-    def __init__(self, name: str, epsilon: float = 1.0, iterations: int = 1000):
-        super().__init__(name, iterations)
+    def __init__(self, name: str, epsilon: float = 1.0, time_steps: int = 1000):
+        super().__init__(name, time_steps)
         self.epsilon: float = epsilon   # explore rate
         self.step_size: float = 1           # step-size
         self.N: np.ndarray = np.zeros(shape=0, dtype=float)
@@ -15,7 +15,7 @@ class EGreedy(algorithm.Algorithm):
         self.N = np.zeros(shape=self.problem.k, dtype=float)
         self.Q = np.zeros(shape=self.problem.k, dtype=float)
 
-    def _do_iteration(self):
+    def _do_time_step(self):
         self._a = self.pick_action()
         self._r = self.problem.get_return(self._a)
         self.N[self._a] += 1
