@@ -46,7 +46,7 @@ class Controller:
         # alg2 = algorithms.UCB(name="UCB", time_steps=self.time_steps, c=2.0)
         # self.algorithms = [alg1, alg2]
 
-        self.epochs = 200
+        self.epochs = 2000
         self.time_steps = 1000
         gb = algorithms.GradientBandit
         alg1 = gb(name="alpha=0.1", time_steps=self.time_steps, alpha=0.1)
