@@ -25,10 +25,10 @@ class GradientBandit(algorithm.Algorithm):
             # if self.t == 1:
             #     self._r_bar = self._r
             # else:
-            if self.problem.is_stationary:
-                self._r_bar += (1/self.t) * (self._r - self._r_bar)
-            else:
+            if self.problem.non_stationary:
                 raise NotImplementedError
+            else:
+                self._r_bar += (1/self.t) * (self._r - self._r_bar)
 
         # update preferences
         for a in range(self.problem.k):
