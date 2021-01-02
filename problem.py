@@ -1,13 +1,14 @@
 import numpy as np
 
 
-class StationaryProblem:
-    is_stationary: bool = True
+class Problem:
     k: int = 10
     rng: np.random.Generator = np.random.default_rng()
 
-    def __init__(self, center: float = 0.0):
+    def __init__(self, center: float = 0.0, non_stationary: bool = False):
         self.center = center
+        self.non_stationary = non_stationary
+
         self.mean: np.ndarray = np.zeros(shape=self.k, dtype=float)
         self.variance: np.ndarray = np.ones(shape=self.k, dtype=float)
         self.std_dev: np.ndarray = np.ones(shape=self.k, dtype=float)
@@ -21,7 +22,10 @@ class StationaryProblem:
 
     # noinspection PyUnusedLocal
     def do_time_step(self, t: int = 0):
-        pass
+        if self.non_stationary:
+            self.mean += self.rng.normal(loc=0, scale=0.01, size=self.k)
+            self.optimum_action: int = int(np.argmax(self.mean))
+            self.optimum_return: float = float(np.max(self.mean))
 
     def get_return(self, action: int) -> float:
         mean: float = self.mean[action]
