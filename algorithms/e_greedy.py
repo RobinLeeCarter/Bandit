@@ -4,7 +4,7 @@ from algorithms import greedy
 
 
 class EGreedy(greedy.Greedy):
-    def __init__(self, name: str, time_steps: int = 1000, epsilon: float = 0.0):
+    def __init__(self, name: str = "no name", time_steps: int = 1000, epsilon: float = 0.0):
         super().__init__(name, time_steps)
         self.epsilon: float = epsilon   # explore rate
 

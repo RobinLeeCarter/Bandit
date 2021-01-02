@@ -9,7 +9,7 @@ import problem
 class Algorithm(abc.ABC):
     rng: np.random.Generator = np.random.default_rng()
 
-    def __init__(self, name: str, time_steps: int = 0):
+    def __init__(self, name: str = "no name", time_steps: int = 0):
         self.name = name
         self.problem: Optional[problem.Problem] = None
         self.epoch: int = 0
@@ -57,3 +57,10 @@ class Algorithm(abc.ABC):
         #       f"\tmean = {self._problem.mean[self._a]:.2f}" +
         #       f"\toptimum={self._problem.optimum_return:.2f}" +
         #       f"\tpercent_return={percent_return:.2f}")
+
+    def get_av_reward(self, final_steps: int = 0):
+        if final_steps == 0:
+            av_reward = float(np.mean(self.av_return))
+        else:
+            av_reward = float(np.mean(self.av_return[-final_steps:]))
+        return av_reward

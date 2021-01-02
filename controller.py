@@ -1,4 +1,4 @@
-from typing import List, Callable
+from typing import List
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,25 +16,29 @@ class Controller:
         self.non_stationary = False
         self.problem_center = 0.0
         self.algorithms: List[algorithms.Algorithm] = []
-        self.build()
+        self.powers: np.ndarray = np.ndarray(shape=(0,), dtype=float)
+        self.hyperparameters: np.ndarray = np.ndarray(shape=(0, ), dtype=float)
+        # self.learning_curves()
+        self.parameter_study()
 
-    def build(self):
-        # self.e_greedy_comparison()
+    def learning_curves(self):
+        self.e_greedy_comparison()
         # self.sample_vs_alpha()
         # self.optimistic_vs_realistic()
         # self.optimistic_biased_vs_unbiased()
         # self.e_greedy_vs_ucb()
-        self.gradient_bandit_comparison()
+        # self.gradient_bandit_comparison()
+
         self.run()
-        self.graph()
+        self.learning_curve_graph()
 
     def e_greedy_comparison(self):
         self.epochs = 2000
         self.time_steps = 1000
 
-        alg1 = algorithms.EGreedy(name="greedy", epsilon=0.0, time_steps=self.time_steps)
-        alg2 = algorithms.EGreedy(name="ε=0.01", epsilon=0.01, time_steps=self.time_steps)
-        alg3 = algorithms.EGreedy(name="ε=0.1", epsilon=0.1, time_steps=self.time_steps)
+        alg1 = algorithms.EGreedy(name="greedy", time_steps=self.time_steps, epsilon=0.0)
+        alg2 = algorithms.EGreedy(name="ε=0.01", time_steps=self.time_steps, epsilon=0.01)
+        alg3 = algorithms.EGreedy(name="ε=0.1", time_steps=self.time_steps, epsilon=0.1)
         self.algorithms = [alg1, alg2, alg3]
 
     def sample_vs_alpha(self):
@@ -102,7 +106,7 @@ class Controller:
                 for alg in self.algorithms:
                     alg.do_time_step_and_record(t)
 
-    def graph(self):
+    def learning_curve_graph(self):
         time_steps_x = np.arange(self.time_steps)
         for alg in self.algorithms:
             plt.plot(time_steps_x, alg.av_return, label=alg.name)
@@ -113,3 +117,23 @@ class Controller:
             plt.plot(time_steps_x, alg.av_percent, label=alg.name)
             plt.legend()
         plt.show()
+
+    def parameter_study(self):
+        self.epochs = 200
+        self.time_steps = 1000
+
+        self.powers = np.arange(-7, 2+1)
+        self.hyperparameters = 2.0**self.powers
+        self.e_greedy_parameter_study()
+        self.run()
+        for alg in self.algorithms:
+            av_reward = alg.get_av_reward()
+            print(f"{alg.name}\t{av_reward}")
+
+    def e_greedy_parameter_study(self):
+        for power in range(-7, -2+1):
+            epsilon = 2**power
+            print(f"epsilon: {epsilon}")
+            alg = algorithms.EGreedy(name=f"e-greedy epsilon={epsilon}", time_steps=self.time_steps,
+                                     epsilon=epsilon)
+            self.algorithms.append(alg)
