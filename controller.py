@@ -16,6 +16,17 @@ class Controller:
         self.non_stationary = False
         self.problem_center = 0.0
         self.algorithms: List[algorithms.Algorithm] = []
+        self.build()
+
+    def build(self):
+        # self.e_greedy_comparison()
+        # self.sample_vs_alpha()
+        # self.optimistic_vs_realistic()
+        # self.optimistic_biased_vs_unbiased()
+        # self.e_greedy_vs_ucb()
+        self.gradient_bandit_comparison()
+        self.run()
+        self.graph()
 
     def e_greedy_comparison(self):
         self.epochs = 2000
@@ -76,9 +87,7 @@ class Controller:
         alg4 = gb(name="alpha=0.4 no baseline", time_steps=self.time_steps, alpha=0.4, baseline_enabled=False)
         self.algorithms = [alg1, alg2, alg3, alg4]
 
-    def run(self, set_algorithms: Callable[[], None] = None):
-        if set_algorithms is not None:
-            set_algorithms()
+    def run(self):
         for epoch in range(self.epochs):
             if self.verbose and epoch % 100 == 0:
                 print(f"epoch = {epoch}")
