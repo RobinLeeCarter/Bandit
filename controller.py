@@ -13,22 +13,24 @@ class Controller:
 
         self.epochs: int = 0
         self.time_steps: int = 0
-        self.algorithms: List[algorithms.Algorithm] = []
-
         self.non_stationary = False
         self.problem_center = 0.0
+        self.algorithms: List[algorithms.Algorithm] = []
 
     def e_greedy_comparison(self):
         self.epochs = 2000
         self.time_steps = 1000
+
         alg1 = algorithms.EGreedy(name="greedy", epsilon=0.0, time_steps=self.time_steps)
         alg2 = algorithms.EGreedy(name="ε=0.01", epsilon=0.01, time_steps=self.time_steps)
         alg3 = algorithms.EGreedy(name="ε=0.1", epsilon=0.1, time_steps=self.time_steps)
         self.algorithms = [alg1, alg2, alg3]
 
     def sample_vs_alpha(self):
-        self.epochs = 200
+        self.epochs = 2000
         self.time_steps = 10000
+        self.non_stationary = True
+
         alg1 = algorithms.EGreedy(name="sample averages", time_steps=self.time_steps,
                                   epsilon=0.1)
         alg2 = algorithms.EGreedyAlpha(name="constant step-size", time_steps=self.time_steps,
@@ -36,8 +38,9 @@ class Controller:
         self.algorithms = [alg1, alg2]
 
     def optimistic_vs_realistic(self):
-        self.epochs = 200
+        self.epochs = 2000
         self.time_steps = 1000
+
         alg1 = algorithms.EGreedyAlpha(name="optimistic greedy", time_steps=self.time_steps,
                                        epsilon=0.0, alpha=0.1, q1=5.0)
         alg2 = algorithms.EGreedyAlpha(name="realistic non-greedy", time_steps=self.time_steps,
@@ -45,8 +48,9 @@ class Controller:
         self.algorithms = [alg1, alg2]
 
     def optimistic_biased_vs_unbiased(self):
-        self.epochs = 200
+        self.epochs = 2000
         self.time_steps = 1000
+
         alg1 = algorithms.EGreedyAlpha(name="optimistic non-greedy biased", time_steps=self.time_steps,
                                        epsilon=0.1, alpha=0.1, q1=5.0)
         alg2 = algorithms.EGreedyAlpha(name="optimistic non-greedy unbiased", time_steps=self.time_steps,
@@ -54,16 +58,15 @@ class Controller:
         self.algorithms = [alg1, alg2]
 
     def e_greedy_vs_ucb(self):
-        self.epochs = 200
+        self.epochs = 2000
         self.time_steps = 1000
         alg1 = algorithms.EGreedy(name="e-greedy", time_steps=self.time_steps, epsilon=0.1)
         alg2 = algorithms.UCB(name="UCB", time_steps=self.time_steps, c=2.0)
         self.algorithms = [alg1, alg2]
 
     def gradient_bandit_comparison(self):
-        self.epochs = 200
+        self.epochs = 2000
         self.time_steps = 1000
-
         self.problem_center = 4.0
 
         gb = algorithms.GradientBandit
