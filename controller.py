@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import figure
 
+import utils
 import problem
 import algorithms
 
@@ -18,6 +19,7 @@ class Controller:
         self.problem_center = 0.0
         self.algorithms: List[algorithms.Algorithm] = []
         self.algorithms_i: List[int] = []
+        self.timer = utils.Timer()
 
         self.time_steps_x: np.ndarray = np.ndarray(shape=(0,), dtype=int)
         # self.learning_curves()
@@ -37,6 +39,7 @@ class Controller:
         # self.gradient_bandit_comparison()
 
         self.run()
+        self.timer.stop()
         self.learning_curve_graph()
 
     def e_greedy_comparison(self):
@@ -98,10 +101,10 @@ class Controller:
         alg4 = gb(name="alpha=0.4 no baseline", time_steps=self.time_steps, alpha=0.4, baseline_enabled=False)
         self.algorithms = [alg1, alg2, alg3, alg4]
 
-    def run(self):
+    def run(self, reporting_frequency: int = 100):
         for epoch in range(self.epochs):
-            if self.verbose and epoch % 100 == 0:
-                print(f"epoch = {epoch}")
+            if self.verbose and epoch % reporting_frequency == 0:
+                self.timer.lap(f"epoch = {epoch}", show=True)
 
             problem_ = problem.Problem(center=self.problem_center, non_stationary=self.non_stationary)
 
@@ -160,7 +163,8 @@ class Controller:
         optimistic[:] = np.nan
         self.optimistic_parameter_study()
 
-        self.run()
+        self.run(reporting_frequency=10)
+        self.timer.stop()
         for i, alg in zip(self.algorithms_i, self.algorithms):
             av_reward = alg.get_av_reward()
             # print(f"{alg.name}\t{av_reward}")
@@ -191,9 +195,9 @@ class Controller:
     def non_stationary_parameter_study(self):
         self.non_stationary = True
         self.epochs = 100
-        self.time_steps = 20_000
+        self.time_steps = 200_000
 
-        self.powers = np.arange(-7, 2+1)
+        self.powers = np.arange(-9, 2+1)
         self.hyperparameters = 2.0**self.powers
 
         e_greedy = np.empty(shape=self.powers.shape, dtype=float)
@@ -212,9 +216,10 @@ class Controller:
         constant_step[:] = np.nan
         self.constant_step_parameter_study()
 
-        self.run()
+        self.run(reporting_frequency=1)
+        self.timer.stop()
         for i, alg in zip(self.algorithms_i, self.algorithms):
-            av_reward = alg.get_av_reward(final_steps=10_000)
+            av_reward = alg.get_av_reward(final_steps=100_000)
             # print(f"{alg.name}\t{av_reward}")
             alg_type = type(alg)
             if alg_type == algorithms.EGreedy:
@@ -240,7 +245,7 @@ class Controller:
 
     def e_greedy_parameter_study(self):
         for i, power in enumerate(self.powers):
-            if -7 <= power <= -1:
+            if -7 <= power <= -2:
                 epsilon = self.hyperparameters[i]
                 alg = algorithms.EGreedy(name=f"e-greedy epsilon={epsilon}", time_steps=self.time_steps,
                                          epsilon=epsilon)
@@ -258,7 +263,7 @@ class Controller:
 
     def ucb_parameter_study(self):
         for i, power in enumerate(self.powers):
-            if -4 <= power <= 2:
+            if -3 <= power <= 2:
                 c = self.hyperparameters[i]
                 alg = algorithms.UCB(name=f"UCB c={c}", time_steps=self.time_steps,
                                      c=c)
@@ -276,7 +281,7 @@ class Controller:
 
     def constant_step_parameter_study(self):
         for i, power in enumerate(self.powers):
-            if -7 <= power <= -1:
+            if -9 <= power <= -2:
                 epsilon = self.hyperparameters[i]
                 alg = algorithms.EGreedyAlpha(name=f"constant_step epsilon={epsilon}", time_steps=self.time_steps,
                                               epsilon=epsilon, alpha=0.1)

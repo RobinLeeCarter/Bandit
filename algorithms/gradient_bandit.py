@@ -9,7 +9,7 @@ class GradientBandit(algorithm.Algorithm):
         self.alpha = alpha
         self.baseline_enabled = baseline_enabled
         self._r_bar: float = 0.0
-        self.baseline_alpha = 0.01
+        self.baseline_alpha = 0.03
         self.N: np.ndarray = np.zeros(shape=0, dtype=float)
         self.H: np.ndarray = np.zeros(shape=0, dtype=float)
         self.PI: np.ndarray = np.zeros(shape=0, dtype=float)
