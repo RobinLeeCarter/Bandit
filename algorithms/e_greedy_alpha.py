@@ -5,7 +5,7 @@ from algorithms import e_greedy
 
 class EGreedyAlpha(e_greedy.EGreedy):
     def __init__(self, name: str, time_steps: int = 1000,
-                 epsilon: float = 1.0, alpha: float = 1.0, q1: float = 0, biased: bool = True):
+                 epsilon: float = 0.0, alpha: float = 1.0, q1: float = 0, biased: bool = True):
         super().__init__(name, time_steps, epsilon)
         self.alpha = alpha
         self.q1 = q1

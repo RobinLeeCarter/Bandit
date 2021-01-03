@@ -2,6 +2,7 @@ from typing import List
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import figure
 
 import problem
 import algorithms
@@ -16,9 +17,14 @@ class Controller:
         self.non_stationary = False
         self.problem_center = 0.0
         self.algorithms: List[algorithms.Algorithm] = []
+        self.algorithms_i: List[int] = []
+
+        self.time_steps_x: np.ndarray = np.ndarray(shape=(0,), dtype=int)
+        # self.learning_curves()
+
         self.powers: np.ndarray = np.ndarray(shape=(0,), dtype=float)
         self.hyperparameters: np.ndarray = np.ndarray(shape=(0, ), dtype=float)
-        # self.learning_curves()
+
         self.parameter_study()
 
     def learning_curves(self):
@@ -33,7 +39,7 @@ class Controller:
         self.learning_curve_graph()
 
     def e_greedy_comparison(self):
-        self.epochs = 2000
+        self.epochs = 200
         self.time_steps = 1000
 
         alg1 = algorithms.EGreedy(name="greedy", time_steps=self.time_steps, epsilon=0.0)
@@ -107,33 +113,112 @@ class Controller:
                     alg.do_time_step_and_record(t)
 
     def learning_curve_graph(self):
-        time_steps_x = np.arange(self.time_steps)
-        for alg in self.algorithms:
-            plt.plot(time_steps_x, alg.av_return, label=alg.name)
-            plt.legend()
-        plt.show()
+        self.time_steps_x = np.arange(self.time_steps)
+        self.learning_curve_av_return()
+        self.learning_curve_av_percent()
+
+    def learning_curve_av_return(self):
+        fig: figure.Figure = plt.figure()
+        ax: figure.Axes = fig.subplots()
 
         for alg in self.algorithms:
-            plt.plot(time_steps_x, alg.av_percent, label=alg.name)
-            plt.legend()
+            ax.plot(self.time_steps_x, alg.av_return, label=alg.name)
+            ax.legend()
+        plt.show()
+
+    def learning_curve_av_percent(self):
+        fig: figure.Figure = plt.figure()
+        ax: figure.Axes = fig.subplots()
+
+        for alg in self.algorithms:
+            ax.plot(self.time_steps_x, alg.av_percent, label=alg.name)
+            ax.legend()
+
         plt.show()
 
     def parameter_study(self):
-        self.epochs = 200
+        self.epochs = 2000
         self.time_steps = 1000
 
         self.powers = np.arange(-7, 2+1)
         self.hyperparameters = 2.0**self.powers
+
+        e_greedy = np.empty(shape=self.powers.shape, dtype=float)
+        e_greedy[:] = np.nan
         self.e_greedy_parameter_study()
+
+        gradient_bandit = np.empty(shape=self.powers.shape, dtype=float)
+        gradient_bandit[:] = np.nan
+        self.gradient_bandit_parameter_study()
+
+        ucb = np.empty(shape=self.powers.shape, dtype=float)
+        ucb[:] = np.nan
+        self.ucb_parameter_study()
+
+        optimistic = np.empty(shape=self.powers.shape, dtype=float)
+        optimistic[:] = np.nan
+        self.optimistic_parameter_study()
+
         self.run()
-        for alg in self.algorithms:
+        for i, alg in zip(self.algorithms_i, self.algorithms):
             av_reward = alg.get_av_reward()
-            print(f"{alg.name}\t{av_reward}")
+            # print(f"{alg.name}\t{av_reward}")
+            alg_type = type(alg)
+            if alg_type == algorithms.EGreedy:
+                e_greedy[i] = av_reward
+            elif alg_type == algorithms.GradientBandit:
+                gradient_bandit[i] = av_reward
+            elif alg_type == algorithms.UCB:
+                ucb[i] = av_reward
+            elif alg_type == algorithms.EGreedyAlpha:
+                assert isinstance(alg, algorithms.EGreedyAlpha)
+                if alg.q1 > 0:
+                    optimistic[i] = av_reward
+
+        fig: figure.Figure = plt.figure()
+        ax: figure.Axes = fig.subplots()
+        ax.set_xlim(xmin=np.min(self.powers), xmax=np.max(self.powers))
+        ax.set_xlabel("hyperparameter power of 2")
+        # ax.set_xscale("log")
+        ax.plot(self.powers, e_greedy, label="e-greedy")
+        ax.plot(self.powers, gradient_bandit, label="gradient bandit")
+        ax.plot(self.powers, ucb, label="ucb")
+        ax.plot(self.powers, optimistic, label="greedy with optimistic initialization")
+        ax.legend()
+        plt.show()
 
     def e_greedy_parameter_study(self):
-        for power in range(-7, -2+1):
-            epsilon = 2**power
-            print(f"epsilon: {epsilon}")
-            alg = algorithms.EGreedy(name=f"e-greedy epsilon={epsilon}", time_steps=self.time_steps,
-                                     epsilon=epsilon)
-            self.algorithms.append(alg)
+        for i, power in enumerate(self.powers):
+            if -7 <= power <= -2:
+                epsilon = self.hyperparameters[i]
+                alg = algorithms.EGreedy(name=f"e-greedy epsilon={epsilon}", time_steps=self.time_steps,
+                                         epsilon=epsilon)
+                self.algorithms_i.append(i)
+                self.algorithms.append(alg)
+
+    def gradient_bandit_parameter_study(self):
+        for i, power in enumerate(self.powers):
+            if -5 <= power <= 1:
+                alpha = self.hyperparameters[i]
+                alg = algorithms.GradientBandit(name=f"gradient alpha={alpha}", time_steps=self.time_steps,
+                                                alpha=alpha)
+                self.algorithms_i.append(i)
+                self.algorithms.append(alg)
+
+    def ucb_parameter_study(self):
+        for i, power in enumerate(self.powers):
+            if -4 <= power <= 2:
+                c = self.hyperparameters[i]
+                alg = algorithms.UCB(name=f"UCB c={c}", time_steps=self.time_steps,
+                                     c=c)
+                self.algorithms_i.append(i)
+                self.algorithms.append(alg)
+
+    def optimistic_parameter_study(self):
+        for i, power in enumerate(self.powers):
+            if -2 <= power <= 2:
+                q1 = self.hyperparameters[i]
+                alg = algorithms.EGreedyAlpha(name=f"optimistic q1={q1}", time_steps=self.time_steps,
+                                              epsilon=0.0, alpha=0.1, q1=q1)
+                self.algorithms_i.append(i)
+                self.algorithms.append(alg)
