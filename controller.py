@@ -25,7 +25,8 @@ class Controller:
         self.powers: np.ndarray = np.ndarray(shape=(0,), dtype=float)
         self.hyperparameters: np.ndarray = np.ndarray(shape=(0, ), dtype=float)
 
-        self.parameter_study()
+        # self.stationary_parameter_study()
+        self.non_stationary_parameter_study()
 
     def learning_curves(self):
         self.e_greedy_comparison()
@@ -136,7 +137,7 @@ class Controller:
 
         plt.show()
 
-    def parameter_study(self):
+    def stationary_parameter_study(self):
         self.epochs = 2000
         self.time_steps = 1000
 
@@ -187,9 +188,59 @@ class Controller:
         ax.legend()
         plt.show()
 
+    def non_stationary_parameter_study(self):
+        self.non_stationary = True
+        self.epochs = 100
+        self.time_steps = 20_000
+
+        self.powers = np.arange(-7, 2+1)
+        self.hyperparameters = 2.0**self.powers
+
+        e_greedy = np.empty(shape=self.powers.shape, dtype=float)
+        e_greedy[:] = np.nan
+        self.e_greedy_parameter_study()
+
+        gradient_bandit = np.empty(shape=self.powers.shape, dtype=float)
+        gradient_bandit[:] = np.nan
+        self.gradient_bandit_parameter_study()
+
+        ucb = np.empty(shape=self.powers.shape, dtype=float)
+        ucb[:] = np.nan
+        self.ucb_parameter_study()
+
+        constant_step = np.empty(shape=self.powers.shape, dtype=float)
+        constant_step[:] = np.nan
+        self.constant_step_parameter_study()
+
+        self.run()
+        for i, alg in zip(self.algorithms_i, self.algorithms):
+            av_reward = alg.get_av_reward(final_steps=10_000)
+            # print(f"{alg.name}\t{av_reward}")
+            alg_type = type(alg)
+            if alg_type == algorithms.EGreedy:
+                e_greedy[i] = av_reward
+            elif alg_type == algorithms.GradientBandit:
+                gradient_bandit[i] = av_reward
+            elif alg_type == algorithms.UCB:
+                ucb[i] = av_reward
+            elif alg_type == algorithms.EGreedyAlpha:
+                constant_step[i] = av_reward
+
+        fig: figure.Figure = plt.figure()
+        ax: figure.Axes = fig.subplots()
+        ax.set_xlim(xmin=np.min(self.powers), xmax=np.max(self.powers))
+        ax.set_xlabel("hyperparameter power of 2")
+        # ax.set_xscale("log")
+        ax.plot(self.powers, e_greedy, label="e-greedy")
+        ax.plot(self.powers, gradient_bandit, label="gradient bandit")
+        ax.plot(self.powers, ucb, label="ucb")
+        ax.plot(self.powers, constant_step, label="e-greedy with constant step-size")
+        ax.legend()
+        plt.show()
+
     def e_greedy_parameter_study(self):
         for i, power in enumerate(self.powers):
-            if -7 <= power <= -2:
+            if -7 <= power <= -1:
                 epsilon = self.hyperparameters[i]
                 alg = algorithms.EGreedy(name=f"e-greedy epsilon={epsilon}", time_steps=self.time_steps,
                                          epsilon=epsilon)
@@ -198,7 +249,7 @@ class Controller:
 
     def gradient_bandit_parameter_study(self):
         for i, power in enumerate(self.powers):
-            if -5 <= power <= 1:
+            if -5 <= power <= 0:
                 alpha = self.hyperparameters[i]
                 alg = algorithms.GradientBandit(name=f"gradient alpha={alpha}", time_steps=self.time_steps,
                                                 alpha=alpha)
@@ -220,5 +271,14 @@ class Controller:
                 q1 = self.hyperparameters[i]
                 alg = algorithms.EGreedyAlpha(name=f"optimistic q1={q1}", time_steps=self.time_steps,
                                               epsilon=0.0, alpha=0.1, q1=q1)
+                self.algorithms_i.append(i)
+                self.algorithms.append(alg)
+
+    def constant_step_parameter_study(self):
+        for i, power in enumerate(self.powers):
+            if -7 <= power <= -1:
+                epsilon = self.hyperparameters[i]
+                alg = algorithms.EGreedyAlpha(name=f"constant_step epsilon={epsilon}", time_steps=self.time_steps,
+                                              epsilon=epsilon, alpha=0.1)
                 self.algorithms_i.append(i)
                 self.algorithms.append(alg)

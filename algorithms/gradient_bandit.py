@@ -9,6 +9,7 @@ class GradientBandit(algorithm.Algorithm):
         self.alpha = alpha
         self.baseline_enabled = baseline_enabled
         self._r_bar: float = 0.0
+        self.baseline_alpha = 0.01
         self.N: np.ndarray = np.zeros(shape=0, dtype=float)
         self.H: np.ndarray = np.zeros(shape=0, dtype=float)
         self.PI: np.ndarray = np.zeros(shape=0, dtype=float)
@@ -26,7 +27,7 @@ class GradientBandit(algorithm.Algorithm):
             #     self._r_bar = self._r
             # else:
             if self.problem.non_stationary:
-                raise NotImplementedError
+                self._r_bar += self.baseline_alpha * (self._r - self._r_bar)
             else:
                 self._r_bar += (1/self.t) * (self._r - self._r_bar)
 
